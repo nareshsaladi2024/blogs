@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OIC Error Hospital: Architecture, Agents, and Database Schema</title>
+  <meta name="description" content="How we built a resilient Oracle Integration Cloud (OIC) error management hub" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>OIC Error Hospital: Architecture, Agents, and Database Schema</h1>
+    <p class="subtitle">How we built a resilient Oracle Integration Cloud (OIC) error management hub</p>
+    <p class="meta">By Naresh Saladi · August 14, 2025</p>
+  </header>
+  <main class="content markdown">
+
+    <article>
+      <h2>What is the OIC Error Hospital?</h2>
+      <p>An operational hub that continuously <strong>collects, stores, reconciles, and resubmits</strong> Oracle Integration Cloud (OIC) errors so teams can trace failures over time and act on them quickly.</p>
+      <h3>Key capabilities</h3>
+      <ul>
+        <li>Collect all OIC Integration errors <strong>every 15 minutes</strong></li>
+        <li>Persist error details to <strong>ATP</strong> for historical analysis</li>
+        <li>Reconcile <strong>resubmitted transactions</strong> (completed/failed) hourly</li>
+        <li>Support <strong>bulk resubmission</strong> with optional throttling</li>
+      </ul>
+
+      <h2>Agent Architecture (High Level)</h2>
+      <ol>
+        <li><strong>Error Collection Agent</strong> — polls OIC for both recoverable and non‑recoverable integration errors and logs them to the ATP store.</li>
+        <li><strong>Error Reconcile Agent</strong> — inspects recovery jobs and updates each instance’s lifecycle status (completed / failed).</li>
+      </ol>
+
+      <h2>Error Collection Agent</h2>
+      <ul>
+        <li><strong>Integration Name:</strong> IT SERVICES OIC ERROR COLLECTION AGENT</li>
+        <li><strong>Style:</strong> Scheduled Event Integration</li>
+        <li><strong>Identifier:</strong> IT_SERVI_OIC_ERROR_COLLE_AGENT</li>
+        <li><strong>Revision:</strong> 1.0</li>
+        <li><strong>Schedule:</strong> Every 15 minutes</li>
+        <li><strong>Objective:</strong> Capture OIC errors (recoverable &amp; non‑recoverable) for all OIC integrations and persist with rich context.</li>
+      </ul>
+
+      <h2>Error Reconcile Agent</h2>
+      <ul>
+        <li><strong>Integration Name:</strong> IT SERVICES OIC ERROR RECONCILE AGENT</li>
+        <li><strong>Style:</strong> Scheduled Event Integration</li>
+        <li><strong>Identifier:</strong> IT_SERVI_OIC_ERROR_RECON_AGENT</li>
+        <li><strong>Revision:</strong> 1.0</li>
+        <li><strong>Schedule:</strong> Every 1 hour</li>
+        <li><strong>Objective:</strong> Track recovery jobs for previously captured errors and reconcile their outcome.</li>
+      </ul>
+
+      <h2>Data Model (ATP)</h2>
+      <pre><code>CREATE TABLE "OIC_ERROR_HOSPITAL" (
+  "INSTANCE_ID" VARCHAR2(100 BYTE) NOT NULL,
+  "INTEGRATION_NAME" VARCHAR2(100 BYTE) NOT NULL,
+  "INTEGRATION_CODE" VARCHAR2(100 BYTE) NOT NULL,
+  "INTEGRATION_ID" VARCHAR2(100 BYTE) NOT NULL,
+  "INTEGRATION_VERSION" VARCHAR2(100 BYTE) NOT NULL,
+  "TRACKING_VAR_1" VARCHAR2(2000 BYTE),
+  "TRACKING_VAR_2" VARCHAR2(2000 BYTE),
+  "TRACKING_VAR_3" VARCHAR2(2000 BYTE),
+  "ENVIRONMENT" VARCHAR2(100 BYTE),
+  "ENDPOINT_NAME" VARCHAR2(100 BYTE),
+  "ENDPOINT_OPERATION" VARCHAR2(100 BYTE),
+  "ENDPOINT_TYPE" VARCHAR2(100 BYTE),
+  "STATUS" VARCHAR2(100 BYTE),
+  "CREATED_DT" TIMESTAMP (3) WITH LOCAL TIME ZONE NOT NULL,
+  "MODIFIED_DT" TIMESTAMP (3) WITH LOCAL TIME ZONE,
+  "ERROR_TIME" TIMESTAMP (3) WITH LOCAL TIME ZONE,
+  "RECOVERABLE" VARCHAR2(100 BYTE),
+  "RETRY_COUNT" NUMBER(2,0),
+  "FAULT_LOCATION" VARCHAR2(2000 BYTE),
+  "ERROR_CODE" VARCHAR2(2000 BYTE),
+  "ERROR_DETAILS" CLOB,
+  "ERROR_LOCATION" VARCHAR2(2000 BYTE),
+  "ERROR_MESSAGE" CLOB,
+  "ERROR_ITEMS" CLOB,
+  "CAPTURE_DT" TIMESTAMP (3) WITH LOCAL TIME ZONE NOT NULL,
+  PRIMARY KEY ("INSTANCE_ID")
+);</code></pre>
+
+      <h2>Scheduling Strategy</h2>
+      <ul>
+        <li>Collection every 15 minutes balances near‑real‑time signal with OIC limits.</li>
+        <li>Reconciliation hourly keeps state fresh without overloading recovery APIs.</li>
+        <li>For peaks, shorten intervals and increase throttling.</li>
+      </ul>
+
+      <h2>Closing Thoughts</h2>
+      <p>With two scheduled agents and a rich schema, the OIC Error Hospital turns transient errors into actionable, auditable data and automated recoveries.</p>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <p>© 2025 Naresh Saladi. All rights reserved.</p>
+  </footer>
+</body>
+</html>

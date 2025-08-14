@@ -1,0 +1,16 @@
+
+:root { --text: #0f172a; --muted: #475569; --bg: #f8fafc; --card: #ffffff; --accent: #0ea5e9; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+.site-header{padding:3rem 1rem;text-align:center;background:linear-gradient(180deg,#e0f2fe,transparent)}
+h1{margin:0;font-size:2rem;line-height:1.2}
+.subtitle{color:var(--muted);margin:.5rem 0 0}
+.meta{color:var(--muted);margin:.25rem 0 0;font-size:.9rem}
+.content{max-width:860px;margin:0 auto;padding:2rem 1rem}
+.markdown h2{margin-top:2rem;font-size:1.5rem}
+.markdown h3{margin-top:1.25rem;font-size:1.2rem}
+.markdown p{line-height:1.7}
+.markdown ul, .markdown ol{padding-left:1.25rem}
+pre{background:#0b1220;color:#e5e7eb;padding:1rem;border-radius:.75rem;overflow-x:auto}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+.site-footer{padding:2rem 1rem;text-align:center;color:var(--muted)}
